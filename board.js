@@ -31,7 +31,7 @@ function SQ_Y(sq) {
 }
 
 function MOVE_PX(src, dst, step) {
-  return Math.floor((src * step + dst * (MAX_STEP - step)) / MAX_STEP + .5) + "px";
+  return Math.floor((src * step + dst * (MAX_STEP - step)) / MAX_STEP + .5) + "rpx";
 }
 
 //分出结果后0.25s 给出警告
@@ -61,8 +61,8 @@ function Board(container, images, sounds) {
 
   var style = container.style;
   style.position = "relative";
-  style.width = BOARD_WIDTH + "px";       //通过这种方式,将代码中的数字变成了页面上的内容
-  style.height = BOARD_HEIGHT + "px";
+  style.width = BOARD_WIDTH + "rpx";       //通过这种方式,将代码中的数字变成了页面上的内容
+  style.height = BOARD_HEIGHT + "rpx";
   style.background = "url(" + images + "board.jpg)";
   var this_ = this;
   for (var sq = 0; sq < 256; sq ++) {   //棋盘外的无用数组,img数组要表示为 null
@@ -92,8 +92,8 @@ function Board(container, images, sounds) {
   style = this.thinking.style;
   style.visibility = "hidden";
   style.position = "absolute";
-  style.left = THINKING_LEFT + "px";
-  style.top = THINKING_TOP + "px";
+  style.left = THINKING_LEFT + "rpx";
+  style.top = THINKING_TOP + "rpx";
   container.appendChild(this.thinking);   //在<div id="container"></div> 内再添加一个子元素,呈现<thinking.gif>
 
   this.dummy = document.createElement("div");
@@ -164,8 +164,8 @@ Board.prototype.addMove = function(mv, computerMove) {
   var timer = setInterval(function() {
     if (step == 0) {
       clearInterval(timer);
-      style.left = xSrc + "px";
-      style.top = ySrc + "px";
+      style.left = xSrc + "rpx";
+      style.top = ySrc + "rpx";
       style.zIndex = 0;
       this_.postAddMove(mv, computerMove);
     } else {
@@ -214,13 +214,13 @@ Board.prototype.postAddMove = function(mv, computerMove) {
     var timer = setInterval(function() {
       if (step == 0) {
         clearInterval(timer);
-        style.left = xMate + "px";
+        style.left = xMate + "rpx";
         style.zIndex = 0;
         this_.imgSquares[sqMate].src = this_.images +
             (this_.pos.sdPlayer == 0 ? "r" : "b") + "km.gif";
         this_.postMate(computerMove);
       } else {
-        style.left = (xMate + ((step & 1) == 0 ? step : -step) * 2) + "px";
+        style.left = (xMate + ((step & 1) == 0 ? step : -step) * 2) + "rpx";
         step --;
       }
     }, 50);
