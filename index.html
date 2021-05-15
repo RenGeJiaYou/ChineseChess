@@ -1,0 +1,271 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>中国象棋</title>
+    <script type="text/javascript" src="book.js"></script>
+    <script type="text/javascript" src="position.js"></script>
+    <script type="text/javascript" src="search.js"></script>
+    <script type="text/javascript" src="board.js"></script>
+    <script type="text/javascript" src="cchess.js"></script>
+    <style type="text/css">
+body {
+  background: url(../background.gif);
+}
+
+span.td {
+  display: inline-block;
+}
+
+<!--选择项的标题-->
+div.label {
+  font-size: 18px;
+  padding:12px;
+}
+
+select {
+  font-size: 14px;
+  width: 108px;
+  padding:2px;
+}
+
+option {
+  font-size: 14px;
+}
+
+input.button {
+  font-size: 14px;
+  width: 108px;
+}
+
+label {
+  font-size: 14px;
+}
+
+.author {
+  text-align: center;
+  font-size: 18px;
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-weight: 800; 
+  margin-top: 50px;
+}
+
+    </style>
+  </head>
+
+  <body>
+    <!--标题-->
+    <div style="text-align:center;font-size:28px;font-family:黑体">中国象棋·设计与实现</div> 
+    <!--标题和主体的空隙-->   
+    <div style="height:16px"></div>
+    <!--主体-->                                                           
+    <div style="text-align:center;white-space:nowrap">
+      <span class="td" style="margin-right:100px">
+        <!--棋盘,用id来和程序代码产生绑定-->
+        <div id="container"></div>
+        <!---->
+      </span>
+      
+      <!--切换交战模块-->
+      <span class="td" style="vertical-align:top;width:120px;">
+      <div style="text-align:left">
+        <div class="label">谁先走</div>
+        <div>
+          <select id="selMoveMode" size="3">
+            <option selected value="0">玩家先走</option>
+            <option value="1">电脑先走</option>
+            <option value="2">不用电脑</option>
+          </select>
+        </div>
+      <!--/切换交战模块-->
+        
+        <!--残局控制模块-->
+        <div class="label">是否开始一个残局</div>
+        <div>
+          <select id="selHandicap" style="padding:0px">
+            <option selected value="0">完整局面开局</option>
+            <option value="1">残局开局</option>
+          </select>
+        </div>
+        <!--/残局控制模块-->
+        
+        <!--重开&悔棋模块-->
+        <div style="padding-top:2px"><input type="button" class="button" value="重新开始" onclick="restart_click()"></div>
+        <div style="padding-top:2px"><input type="button" class="button" value="悔棋" onclick="retract_click()"></div>
+        <div style="height:12px"></div>
+        <!--重开&悔棋模块-->
+
+        <!--难度分级模块-->
+        <div class="label">电脑水平</div>
+        <div>
+          <select id="selLevel" size="3" onchange="level_change()">
+            <option selected value="0">入门</option>
+            <option value="1">业余</option>
+            <option value="2">专业</option>
+          </select>
+        </div>
+        <div style="height:12px"></div>
+      <!--/难度分级模块-->
+
+      <!--音效,视效模块-->
+        <div><input type="checkbox" class="checkbox" id="chkAnimated" checked onclick="board.animated = checked"><label for="chkAnimated">动画</label></input></div>
+        <div><input type="checkbox" class="checkbox" checked onclick="board.setSound(checked)"><label for="chkSound">音效</label></input></div>
+        <div style="height:60px"></div>
+      <!--/音效,视效模块-->
+
+
+      <!--回顾局面模块-->
+      <!-- <div style="padding-top:2px"><input type="button" class="button" value="局面回顾" onclick="review_click()"></div>
+      <div style="padding-top:2px"><input type="button" class="button" value="上一步" onclick="backstep_click()"></div>
+      <div style="padding-top:2px"><input type="button" class="button" value="下一步" onclick="nextstep_click()"></div>
+      <div style="height:12px"></div> -->
+      <!--/回顾局面模块-->
+
+      <!--记录本局比赛过程模块-->
+        <!-- <div class="label">步骤</div>
+        <div>
+          <select id="selMoveList" size="10" style="font-family:宋体" onchange="moveList_change()">
+            <option selected value="0">=== 开始 ===</option>
+          </select>
+        </div> -->
+      <!--/记录本局比赛过程模块-->
+      
+      </div>  
+      </span>
+      
+      <div class="author">太原工业学院  计算机工程系  172054118  石家俊</div>
+    </div>
+
+
+
+<script type="text/javascript">
+"use strict";
+var coordinate=[
+    (-305,334),(-227,334),(-150,334),(-77,334),(0,334),(77,334),(150,334),(227,334),(305,334),
+
+    (-305,259),(-227,259),(-150,259),(-77,259),(0,259),(77,259),(150,259),(227,259),(305,259),
+
+    (-305,184),(-227,184),(-150,184),(-77,184),(0,184),(77,184),(150,184),(227,184),(305,184),
+
+    (-305,112),(-227,112),(-150,112),(-77,112),(0,112),(77,112),(150,112),(227,112),(305,112),
+
+    (-305,40),(-227,40),(-150,40),(-77,40),(0,40),(77,40),(150,40),(227,40),(305,40),
+
+    (-305,-40),(-227,-40),(-150,-40),(-77,-40),(0,-40),(77,-40),(150,-40),(227,-40),(305,-40),
+
+    (-305,-112),(-227,-112),(-150,-112),(-77,-112),(0,-112),(77,-112),(150,-112),(227,-112),(305,-112),
+
+    (-305,-184),(-227,-184),(-150,-184),(-77,-184),(0,-184),(77,-184),(150,-184),(227,-184),(305,-184),
+
+    (-305,-259),(-227,-259),(-150,-259),(-77,-259),(0,-259),(77,-259),(150,-259),(227,-259),(305,-259),
+
+    (-305,-334),(-227,-334),(-150,-334),(-77,-334),(0,-334),(77,-334),(150,-334),(227,-334),(305,-334),
+];
+
+console.log(coordinate[0]);
+
+// function createOption(text, value, ie8) {
+//   var opt = document.createElement("option");
+//   opt.selected = true;
+//   opt.value = value;
+//   if (ie8) {
+//     opt.text = text;
+//   } else {
+//     opt.innerHTML = text.replace(/ /g, "&nbsp;");
+//   }
+//   return opt;
+// }
+
+//传入的实参Container 就是id="container"的<div>,采用这种方式将JS代码(绘制图像功能)和前端页面连结起来
+var board = new Board(container, "images/", "sounds/");
+board.setSearch(16);
+board.millis = 10;
+board.computer = 1;
+
+// board.onAddMove = function() {
+//   var counter = (board.pos.mvList.length >> 1);   //counter=当前已走步数的一半
+//   var space = (counter > 99 ? "    " : "   ");    //大于,4空格;小于,3空格
+//   counter = (counter > 9 ? "" : " ") + counter + ".";   //标上序号
+//   var text = (board.pos.sdPlayer == 0 ? space : counter) + move2Iccs(board.mvLast);//要用board.mvLast做历史回溯
+//   var value = "" + board.mvLast;
+//   try {
+//     selMoveList.add(createOption(text, value, false));
+//   } catch (e) {
+//     selMoveList.add(createOption(text, value, true));
+//   }
+//   selMoveList.scrollTop = selMoveList.scrollHeight;
+// };
+
+//难度分布,分别搜索10,100,1000ms
+function level_change() {
+  board.millis = Math.pow(10, selLevel.selectedIndex + 1);
+}
+
+//重新开局选择:残局/全局
+function restart_click() {
+  // selMoveList.options.length = 1;
+  // selMoveList.selectedIndex = 0;
+  board.computer = 1 - selMoveMode.selectedIndex;   //返回被选择项的索引号.
+
+  var random =Math.floor(Math.random()*PUZZLE_LIST.length);//获取一个随机数,位于残局表内
+  if (selHandicap.selectedIndex) board.restart(PUZZLE_LIST[random]);      //玩家选择残局开局
+  else                           board.restart(PUZZLE_LIST[0]);           //玩家选择完整开局
+    
+  
+}
+
+//悔棋
+function retract_click() {
+  // for (var i = board.pos.mvList.length; i < selMoveList.options.length; i ++) {
+  //   board.pos.makeMove(parseInt(selMoveList.options[i].value));
+  // }
+  board.retract();
+  // selMoveList.options.length = board.pos.mvList.length;
+  // selMoveList.selectedIndex = selMoveList.options.length - 1;
+}
+
+// //记录步骤
+// function moveList_change() {
+//   if (board.result == RESULT_UNKNOWN) {
+//     selMoveList.selectedIndex = selMoveList.options.length - 1;
+//     return;
+//   }
+//   var from = board.pos.mvList.length;
+//   var to = selMoveList.selectedIndex;
+//   if (from == to + 1) {
+//     return;
+//   }
+//   if (from > to + 1) {
+//     for (var i = to + 1; i < from; i ++) {
+//       board.pos.undoMakeMove();
+//     }
+//   } else {
+//     for (var i = from; i <= to; i ++) {
+//       board.pos.makeMove(parseInt(selMoveList.options[i].value));
+//     }
+//   }
+//   board.flushBoard();
+// }
+
+//局面回顾 函数
+var mvli;       ////在刷新前将本局所有的mvlist备份
+function review_click(){
+  // selMoveList.options.length = 1;
+  // selMoveList.selectedIndex = 1;
+  board.computer = -1;              //表示采用人-人对战 
+  mvli =board.pos.mvList;             //在刷新前将mvlist安全备份
+  board.restart(PUZZLE_LIST[0]);    //重新开始
+}
+
+var index=1;       //记录当前的走法在 mvli 中的下标
+function backstep_click(){
+  retract_click();    //执行一步悔棋
+  index--;   //step退1位
+}
+
+function nextstep_click(){
+  board.pos.makeMove(mvli[index]);    //执行一步
+  index++;                            //下标进1位
+}
+</script>
+  </body>
+</html>
